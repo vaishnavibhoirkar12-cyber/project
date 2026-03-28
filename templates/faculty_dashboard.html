@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - ProjectHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ProjectHub</a>
+        <div class="navbar-nav align-items-center">
+            <span style="font-weight: 500; margin-right: 1rem;">
+                👨‍🏫 Prof. {{ session.username }}
+            </span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 1000px; margin-top: 2rem;">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h2 style="margin-bottom: 2rem; color: var(--text-main);">Pending Evaluations</h2>
+
+        {% if submissions %}
+            <div style="display: grid; gap: 1.5rem;">
+            {% for sub in submissions %}
+                <div class="card" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        
+                        <!-- LEFT SIDE -->
+                        <div style="flex: 2; padding-right: 2rem;">
+                            
+                            <!-- ✅ FIXED -->
+                            <h3 style="color: var(--primary); font-size: 1.25rem;">
+                                {{ sub.title }}
+                            </h3>
+
+                            <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                Submitted by:
+                                <span style="font-weight: 600; color: var(--text-main);">
+                                    {{ sub.user.username if sub.user else 'Unknown' }}
+                                </span>
+                            </p>
+
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                                Date: {{ sub.submitted_at.strftime('%d %b %Y') }}
+                            </p>
+                            
+                            <div style="background: #F9FAFB; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                                <h4 style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                    Project Description:
+                                </h4>
+                                <p>{{ sub.description }}</p>
+                            </div>
+                            
+                            <!-- ✅ FIXED -->
+                            <a href="{{ url_for('download_file', submission_id=sub.id) }}"
+                               class="btn btn-secondary"
+                               style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem;">
+                                📥 Download Project File
+                            </a>
+                        </div>
+                        
+                        <!-- RIGHT SIDE -->
+                        <div style="flex: 1; border-left: 1px solid var(--border); padding-left: 2rem;">
+                            <h4 style="margin-bottom: 1rem;">Provide Evaluation</h4>
+                            
+                            <form action="{{ url_for('grade') }}" method="POST">
+                                
+                                <!-- ✅ FIXED -->
+                                <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                                
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size: 0.9rem;">Grade</label>
+                                    <select name="grade" class="form-control" required>
+                                        <option value="A+">A+</option>
+                                        <option value="A">A</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="F">F</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size: 0.9rem;">Comments</label>
+                                    <textarea name="comments" class="form-control" rows="3" required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                    Submit Review
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 4rem 2rem; border: 2px dashed var(--border);">
+                <h3 style="color: var(--text-muted); margin-bottom: 0.5rem;">All caught up!</h3>
+                <p style="color: var(--text-muted);">No submissions to review.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
